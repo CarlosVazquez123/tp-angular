@@ -15,22 +15,22 @@ export class Punto1 {
     { 
       nombre: 'Masterclass de Mezcla y Sonido en Vivo', 
       descripcion: 'Aprendé a calibrar crossovers, ecualizar monitores y optimizar el flujo de señal en consolas analógicas y digitales.', 
-      img: 'imagenes/punto1/sonido_vivo.jpg' 
+      img: 'punto1/consola_sonido.jpg'
     },
     { 
       nombre: 'Taller de Producción Musical en Reaper', 
       descripcion: 'Técnicas de grabación casera, edición de pistas, uso de plugins y automatizaciones para maquetar tus canciones.', 
-      img: 'imagenes/punto1/produccion_reaper.jpg' 
+      img: 'punto1/produccion_reaper.jpg' 
     },
     { 
       nombre: 'Clínica de Afinación y Calibración de Instrumentos', 
       descripcion: 'Conceptos esenciales para el mantenimiento de guitarras y baterías, tensión de parches, octavación y cuidado del hardware.', 
-      img: 'imagenes/punto1/calibracion.jpg' 
+      img: 'punto1/calibracion.jpg' 
     },
     { 
     nombre: 'Taller de Fundamentos de Audio y Acústica', 
     descripcion: 'Un espacio educativo diseñado para comprender cómo se propaga el sonido, el uso correcto de diferentes tipos de micrófonos y cómo evitar acoples (feedback) en salas cerradas.', 
-    img: 'imagenes/punto1/acustica_sonido.jpg' 
+    img: 'punto1/audio_y_acustica.jpg' 
     }
   ];
 
