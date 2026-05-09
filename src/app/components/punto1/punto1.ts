@@ -13,7 +13,7 @@ export class Punto1 {
   // Fuente de datos: Array de objetos para los eventos
   eventos = [
     { 
-      nombre: 'Masterclass de Mezcla y Sonido en Vivo', 
+      nombre: 'Taller de Mezcla y Sonido en Vivo', 
       descripcion: 'Aprendé a calibrar crossovers, ecualizar monitores y optimizar el flujo de señal en consolas analógicas y digitales.', 
       img: 'punto1/consola_sonido.jpg'
     },

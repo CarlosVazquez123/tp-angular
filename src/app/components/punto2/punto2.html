@@ -1,0 +1,89 @@
+<div class="container my-5">
+  
+  <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom">
+    <h2 class="text-primary fw-bold">🎧 AudioTech Store</h2>
+    
+    <button class="btn btn-dark btn-lg position-relative d-flex align-items-center gap-2 rounded-pill"
+            data-bs-toggle="modal" 
+            data-bs-target="#modalCarrito">
+      <i class="bi bi-cart3"></i> Ver Carrito
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ carrito.length }}
+      </span>
+    </button>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    @for (prod of productos; track prod.id) {
+      <div class="col">
+        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+          <div style="height: 200px; background-color: #f8f9fa;">
+            <img [src]="prod.img" [alt]="prod.nombre" class="w-100 h-100 object-fit-cover">
+          </div>
+          <div class="card-body d-flex flex-column justify-content-between p-4">
+            <div>
+              <h5 class="card-title fw-bold text-dark">{{ prod.nombre }}</h5>
+              <p class="card-text text-muted small">{{ prod.descripcion }}</p>
+            </div>
+            <div class="mt-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fs-5 fw-bold text-success">USD {{ prod.precio }}</span>
+              </div>
+              <button class="btn btn-outline-primary w-100 rounded-pill d-flex align-items-center justify-content-center gap-2"
+                      (click)="agregarAlCarrito(prod)">
+                <i class="bi bi-plus-lg"></i> Agregar al Carrito
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="modal fade" id="modalCarrito" tabindex="-1" aria-labelledby="modalCarritoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow">
+        
+        <div class="modal-header bg-primary text-white border-0 py-3 rounded-top-4">
+          <h5 class="modal-title fw-bold" id="modalCarritoLabel"><i class="bi bi-cart-check-fill me-2"></i>Tu Carrito de Compras</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          @if (carrito.length === 0) {
+            <div class="text-center py-4">
+              <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-2">¡Tu carrito está más vacío que consola apagada!</p>
+            </div>
+          } @else {
+            <ul class="list-group list-group-flush mb-4">
+              @for (item of carrito; track $index) {
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                  <div>
+                    <h6 class="my-0 fw-semibold">{{ item.nombre }}</h6>
+                    <small class="text-muted">Cantidad: 1</small>
+                  </div>
+                  <span class="text-muted fw-bold">USD {{ item.precio }}</span>
+                </li>
+              }
+            </ul>
+
+            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+              <span class="fw-bold fs-5">Total Acumulado:</span>
+              <span class="fw-bold fs-4 text-success">USD {{ calcularTotal() }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer border-0 p-3">
+          <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Seguir Comprando</button>
+          @if (carrito.length > 0) {
+            <button type="button" class="btn btn-danger rounded-pill" (click)="vaciarCarrito()">Vaciar</button>
+          }
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
