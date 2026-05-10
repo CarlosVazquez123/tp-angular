@@ -1,0 +1,54 @@
+/* Contenedor principal de la carta. Define las dimensiones físicas */
+.carta-box {
+  width: 110px;
+  height: 150px;
+  perspective: 1000px; /* Habilita el efecto de profundidad 3D en CSS */
+  cursor: pointer;
+}
+
+/* En pantallas medianas a grandes, las hacemos un toque más grandes */
+@media (min-width: 768px) {
+  .carta-box {
+    width: 140px;
+    height: 180px;
+  }
+}
+
+/* El elemento interno que va a rotar sobre su propio eje */
+.carta-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Animación suave con rebote al final */
+  transform-style: preserve-3d; /* Permite que las caras vivan en espacio 3D */
+}
+
+/* CUANDO LA CARTA ESTÁ VOLTEADA: Rotamos el eje Y de la tarjeta 180 grados */
+.carta-box.volteada .carta-inner {
+  transform: rotateY(180deg);
+}
+
+/* Estilos comunes tanto para el frente como para el reverso */
+.carta-front, .carta-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Oculta la parte de atrás cuando se da vuelta (¡Súper importante!) */
+  user-select: none;
+}
+
+/* La parte trasera (Boca abajo - Fondo azul de Angular con nota musical) */
+.carta-front {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  color: white;
+}
+
+/* La parte delantera (Boca arriba - Foto del equipo) */
+.carta-back {
+  transform: rotateY(180deg); /* Arranca rotada para que, al dar la vuelta general, quede al derecho */
+}
+
+/* Ajustes de tipografía chicos para los textos de la carta */
+.fs-7 {
+  font-size: 0.8rem;
+}

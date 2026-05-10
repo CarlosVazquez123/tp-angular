@@ -1,0 +1,64 @@
+<div class="container my-5 text-center">
+  <h2 class="text-primary fw-bold mb-4">🎵 Sonido y Música: Juego de Memoria</h2>
+
+  <div class="row justify-content-center mb-4">
+    <div class="col-md-6">
+      <div class="card p-3 shadow-sm border-0 bg-light rounded-4 d-flex flex-row justify-content-around align-items-center">
+        <div>
+          <span class="text-muted d-block small fw-bold uppercase">Intentos</span>
+          <span class="fs-3 fw-bold text-dark">{{ intentos }}</span>
+        </div>
+        <div>
+          @if (!juegoIniciado) {
+            <button class="btn btn-success btn-lg rounded-pill px-4" (click)="comenzarPartida()">
+              <i class="bi bi-play-fill"></i> Comenzar Juego
+            </button>
+          } @else {
+            <button class="btn btn-outline-danger btn-lg rounded-pill px-4" (click)="comenzarPartida()">
+              <i class="bi bi-arrow-clockwise"></i> Reiniciar
+            </button>
+          }
+        </div>
+        <div>
+          <span class="text-muted d-block small fw-bold uppercase">Aciertos</span>
+          <span class="fs-3 fw-bold text-success">{{ aciertos }} / 6</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (aciertos === 6) {
+    <div class="alert alert-success rounded-4 p-4 shadow mb-4 animate__animated animate__bounceIn">
+      <h3 class="fw-bold text-success">🎉 ¡Felicitaciones, Amigazo! 🎉</h3>
+      <p class="m-0 fs-5">Completaste el juego de sonido en solo <strong>{{ intentos }}</strong> intentos. ¡Tenés un oído re calibrado!</p>
+    </div>
+  }
+
+  <div class="row row-cols-3 row-cols-md-4 g-3 justify-content-center">
+    @for (carta of cartas; track carta.id) {
+      <div class="col d-flex justify-content-center">
+        <div class="carta-box" 
+             [class.volteada]="carta.estaVolteada || carta.estaEmparejada"
+             (click)="seleccionarCarta(carta)">
+          
+          <div class="carta-inner shadow-sm rounded-4">
+            
+            <div class="carta-front bg-primary text-white d-flex flex-column align-items-center justify-content-center rounded-4">
+              <i class="bi bi-music-note-beamed fs-1 text-opacity-75"></i>
+              <span class="small fw-semibold mt-2">¿Qué será?</span>
+            </div>
+            
+            <div class="carta-back bg-white border border-2 rounded-4 overflow-hidden">
+              <img [src]="carta.img" [alt]="carta.valor" class="w-100 h-100 object-fit-cover">
+              <div class="carta-nombre bg-dark bg-opacity-75 text-white py-1 text-center position-absolute bottom-0 start-0 w-100 fs-7">
+                {{ carta.valor }}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    }
+  </div>
+</div>
