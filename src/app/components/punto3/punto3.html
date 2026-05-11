@@ -1,36 +1,70 @@
 <div class="container my-5 text-center">
-  <h2 class="text-primary fw-bold mb-4">🎵 Sonido y Música: Juego de Memoria</h2>
+  <h2 class="text-primary fw-bold mb-4">⚽ Liga Argentina: Juego de Memoria</h2>
 
   <div class="row justify-content-center mb-4">
-    <div class="col-md-6">
-      <div class="card p-3 shadow-sm border-0 bg-light rounded-4 d-flex flex-row justify-content-around align-items-center">
-        <div>
-          <span class="text-muted d-block small fw-bold uppercase">Intentos</span>
-          <span class="fs-3 fw-bold text-dark">{{ intentos }}</span>
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 shadow-sm border-0 bg-light rounded-4">
+        
+        <div class="d-flex justify-content-around align-items-center mb-3">
+          <div>
+            <span class="text-muted d-block small fw-bold text-uppercase">Intentos Realizados</span>
+            <span class="fs-2 fw-bold text-dark">{{ intentosRealizados }} / {{ intentosMaximos }}</span>
+          </div>
+          <div>
+            <span class="text-muted d-block small fw-bold text-uppercase">Aciertos</span>
+            <span class="fs-2 fw-bold text-success">{{ aciertos }} / 6</span>
+          </div>
         </div>
-        <div>
+
+        <div class="d-flex justify-content-center gap-3">
           @if (!juegoIniciado) {
-            <button class="btn btn-success btn-lg rounded-pill px-4" (click)="comenzarPartida()">
-              <i class="bi bi-play-fill"></i> Comenzar Juego
+            <button class="btn btn-primary btn-lg rounded-pill px-4" (click)="comenzarPartida()">
+              <i class="bi bi-play-fill"></i> Comenzar Partida
             </button>
           } @else {
-            <button class="btn btn-outline-danger btn-lg rounded-pill px-4" (click)="comenzarPartida()">
+            <button class="btn btn-outline-secondary rounded-pill px-3" (click)="comenzarPartida()">
               <i class="bi bi-arrow-clockwise"></i> Reiniciar
             </button>
           }
+
+          @if (juegoIniciado && mensajeResultado === '') {
+            <button class="btn btn-warning btn-lg rounded-pill px-4 fw-bold text-white shadow-sm"
+                    [disabled]="intentoHabilitado || cartasSeleccionadas.length > 0 || intentosRealizados >= intentosMaximos"
+                    (click)="habilitarIntento()">
+              <i class="bi bi-unlock-fill"></i> INTENTAR
+            </button>
+          }
         </div>
-        <div>
-          <span class="text-muted d-block small fw-bold uppercase">Aciertos</span>
-          <span class="fs-3 fw-bold text-success">{{ aciertos }} / 6</span>
-        </div>
+
+        @if (juegoIniciado && mensajeResultado === '') {
+          <div class="mt-3">
+            @if (!intentoHabilitado && cartasSeleccionadas.length === 0) {
+              <span class="badge bg-info text-dark p-2 rounded-pill fs-7">
+                👉 Presioná "INTENTAR" para desbloquear tu próximo movimiento.
+              </span>
+            } @else if (intentoHabilitado && cartasSeleccionadas.length < 2) {
+              <span class="badge bg-success p-2 rounded-pill fs-7 animate__animated animate__flash">
+                🔓 Tablero libre: Volteá 2 cartas para buscar la coincidencia.
+              </span>
+            }
+          </div>
+        }
+
       </div>
     </div>
   </div>
 
-  @if (aciertos === 6) {
+  @if (mensajeResultado === 'GANASTE') {
     <div class="alert alert-success rounded-4 p-4 shadow mb-4 animate__animated animate__bounceIn">
-      <h3 class="fw-bold text-success">🎉 ¡Felicitaciones, Amigazo! 🎉</h3>
-      <p class="m-0 fs-5">Completaste el juego de sonido en solo <strong>{{ intentos }}</strong> intentos. ¡Tenés un oído re calibrado!</p>
+      <h3 class="fw-bold text-success">🏆 ¡CAMPEÓN DE AMÉRICA! 🏆</h3>
+      <p class="m-0 fs-5">Ganaste el juego en solo <strong>{{ intentosRealizados }}</strong> intentos. ¡Tenés una memoria impecable!</p>
+    </div>
+  }
+
+  @if (mensajeResultado === 'PERDISTE') {
+    <div class="alert alert-danger rounded-4 p-4 shadow mb-4 animate__animated animate__shakeX">
+      <h3 class="fw-bold text-danger">🛑 ¡FIN DEL JUEGO! 🛑</h3>
+      <p class="m-0 fs-5">Te quedaste sin intentos de juego (llegaste al límite de <strong>{{ intentosMaximos }}</strong>). ¡A entrenar esa memoria!</p>
     </div>
   }
 
@@ -44,8 +78,8 @@
           <div class="carta-inner shadow-sm rounded-4">
             
             <div class="carta-front bg-primary text-white d-flex flex-column align-items-center justify-content-center rounded-4">
-              <i class="bi bi-music-note-beamed fs-1 text-opacity-75"></i>
-              <span class="small fw-semibold mt-2">¿Qué será?</span>
+              <i class="bi bi-trophy-fill fs-1 text-warning"></i>
+              <span class="small fw-semibold mt-2">¿Qué club es?</span>
             </div>
             
             <div class="carta-back bg-white border border-2 rounded-4 overflow-hidden">

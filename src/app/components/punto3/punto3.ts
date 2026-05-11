@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-// Definimos la estructura de cómo es una "Carta" en nuestro juego
 interface Carta {
-  id: number;        // Identificador único (del 1 al 12)
-  valor: string;     // Nombre del instrumento/equipo (ej: "Consola")
-  img: string;       // Ruta de la imagen
-  estaVolteada: boolean; // Indica si se está mostrando el dibujo
-  estaEmparejada: boolean; // Indica si ya se adivinó su pareja
+  id: number;
+  valor: string;
+  img: string;
+  estaVolteada: boolean;
+  estaEmparejada: boolean;
 }
 
 @Component({
@@ -19,45 +18,48 @@ interface Carta {
 })
 export class Punto3 implements OnInit {
 
-  // Listado base de nuestras 6 imágenes (parejas)
-  // Las imágenes se guardan en public/punto3/
+  // Inyectamos la herramienta para obligar a Angular a actualizar la vista
+  private cdr = inject(ChangeDetectorRef);
+
+  // 1. Temática nueva: Clubes del Fútbol Argentino ⚽
   imagenesBase = [
-    { valor: 'Consola', img: 'punto3/consola.jpg' },
-    { valor: 'Micrófono', img: 'punto3/microfono.jpg' },
-    { valor: 'Auriculares', img: 'punto3/auriculares.jpg' },
-    { valor: 'Guitarra', img: 'punto3/guitarra.jpg' },
-    { valor: 'Batería', img: 'punto3/bateria.jpg' },
-    { valor: 'Interfaz', img: 'punto3/interfaz.jpg' }
+    { valor: 'Boca Juniors', img: 'punto3/boquita.png' },
+    { valor: 'River Plate', img: 'punto3/riber.png' },
+    { valor: 'Independiente', img: 'punto3/independiente.png' },
+    { valor: 'Racing Club', img: 'punto3/racing.png' },
+    { valor: 'San Lorenzo', img: 'punto3/san_lorenzo.png' },
+    { valor: 'Estudiantes LP', img: 'punto3/estudiantes_lp.png' }
   ];
 
-  // El mazo de 12 cartas en juego
   cartas: Carta[] = [];
+  cartasSeleccionadas: Carta[] = [];
 
-  // Variables para controlar el estado del juego
-  cartasSeleccionadas: Carta[] = []; // Guarda las (máximo 2) cartas volteadas en el turno
-  bloquearTablero: boolean = false;   // Evita que el usuario haga clics rápidos mientras se voltean las cartas
-  intentos: number = 0;              // Contador de movimientos
-  aciertos: number = 0;              // Contador de parejas encontradas
-  juegoIniciado: boolean = false;    // Controla si la partida está activa
+  // Lógica de intentos y bloqueos del TP
+  intentosMaximos: number = 20;     // Límite de intentos permitidos
+  intentosRealizados: number = 0;   // Contador de intentos consumidos
+  intentoHabilitado: boolean = false; // Controla si el botón "INTENTAR" fue presionado
+  bloquearTablero: boolean = true;  // Bloquea el clic en las cartas (arranca bloqueado)
+  
+  aciertos: number = 0;
+  juegoIniciado: boolean = false;
+  mensajeResultado: string = '';    // Puede ser 'GANASTE', 'PERDISTE' o vacío
 
-  // Constructor / Inicializador de Angular
   ngOnInit() {
-    // Al arrancar, preparamos un tablero por defecto
     this.inicializarJuego();
   }
 
-  // Crea el mazo de 12 cartas duplicando nuestras 6 imágenes
   inicializarJuego() {
     this.cartas = [];
     this.cartasSeleccionadas = [];
-    this.intentos = 0;
+    this.intentosRealizados = 0;
     this.aciertos = 0;
-    this.bloquearTablero = false;
+    this.intentoHabilitado = false;
+    this.bloquearTablero = true; // Al empezar, no se pueden tocar las cartas
+    this.mensajeResultado = '';
 
-    // Duplicamos las 6 imágenes para tener 12 elementos (6 parejas)
+    // Duplicamos las 6 imágenes de los clubes para tener las 12 cartas
     let idAutoIncrement = 1;
     for (let img of this.imagenesBase) {
-      // Agregamos la primera carta del par
       this.cartas.push({
         id: idAutoIncrement++,
         valor: img.valor,
@@ -65,7 +67,6 @@ export class Punto3 implements OnInit {
         estaVolteada: false,
         estaEmparejada: false
       });
-      // Agregamos la segunda carta del par
       this.cartas.push({
         id: idAutoIncrement++,
         valor: img.valor,
@@ -74,81 +75,82 @@ export class Punto3 implements OnInit {
         estaEmparejada: false
       });
     }
-
-    // Mezclamos el mazo para que queden en posiciones aleatorias
-    this.mezclarCartas();
+    this.cartas.sort(() => Math.random() - 0.5); // Mezclar aleatoriamente
   }
 
-  // Algoritmo para mezclar elementos de un array de forma aleatoria
-  mezclarCartas() {
-    // Usamos el clásico ordenamiento aleatorio de JavaScript (Fisher-Yates simplificado)
-    this.cartas.sort(() => Math.random() - 0.5);
-  }
-
-  // Arranca oficialmente el contador y permite jugar
   comenzarPartida() {
     this.inicializarJuego();
     this.juegoIniciado = true;
   }
 
-  // Esta función se ejecuta CADA VEZ que el usuario hace clic en una carta
-  seleccionarCarta(carta: Carta) {
-    // Seguridad: No hacemos nada si...
-    // 1. El juego no inició.
-    // 2. El tablero está bloqueado temporalmente por una animación.
-    // 3. Hacés clic sobre una carta que ya está dada vuelta o emparejada.
-    if (!this.juegoIniciado || this.bloquearTablero || carta.estaVolteada || carta.estaEmparejada) {
+  // BOTÓN "INTENTAR": Habilita al jugador a voltear exactamente DOS cartas
+  habilitarIntento() {
+    // Seguridad: No se puede intentar si el juego no empezó, si ya se llegó al límite de 20, 
+    // o si el usuario ya tiene cartas volteadas sin resolver en pantalla.
+    if (!this.juegoIniciado || this.intentosRealizados >= this.intentosMaximos || this.cartasSeleccionadas.length > 0 || this.mensajeResultado !== '') {
       return;
     }
 
-    // Volteamos la carta físicamente
-    carta.estaVolteada = true;
-    
-    // La agregamos a nuestra lista temporal de control de turno
-    this.cartasSeleccionadas.push(carta);
-
-    // Si es la primera carta que voltea, esperamos a que elija la segunda
-    if (this.cartasSeleccionadas.length === 1) {
-      return;
-    }
-
-    // Si ya volteó la segunda carta, procesamos el resultado
-    this.verificarCoincidencia();
+    this.intentoHabilitado = true; // Habilitamos la acción
+    this.bloquearTablero = false;  // Desbloqueamos el tablero físico
+    this.intentosRealizados++;     // Se consume un intento al presionar el botón
   }
 
-  // Compara las dos cartas seleccionadas
-  verificarCoincidencia() {
-    this.intentos++; // Sumamos un movimiento realizado
-    this.bloquearTablero = true; // Bloqueamos clics extras para no romper el juego
+  seleccionarCarta(carta: Carta) {
+    // Si no presionó "INTENTAR" (o el tablero está bloqueado), el clic no hace nada
+    if (!this.juegoIniciado || !this.intentoHabilitado || this.bloquearTablero || carta.estaVolteada || carta.estaEmparejada) {
+      return;
+    }
 
+    carta.estaVolteada = true; // Se voltea físicamente la carta
+    this.cartasSeleccionadas.push(carta);
+
+    // Cuando el jugador ya volteó las DOS cartas permitidas por su intento
+    if (this.cartasSeleccionadas.length === 2) {
+      this.bloquearTablero = true;   // Bloqueamos clics rápidos de inmediato
+      this.intentoHabilitado = false; // Se termina la habilitación del intento actual
+      this.verificarCoincidencia();
+    }
+  }
+
+  verificarCoincidencia() {
     const carta1 = this.cartasSeleccionadas[0];
     const carta2 = this.cartasSeleccionadas[1];
 
-    // ¿Tienen el mismo valor? (ej: "Consola" === "Consola")
     if (carta1.valor === carta2.valor) {
-      // ¡Acierto! Las marcamos como emparejadas para siempre
+      // SI COINCIDEN: Las dejamos dadas vuelta y sumamos acierto
       carta1.estaEmparejada = true;
       carta2.estaEmparejada = true;
       this.aciertos++;
-      
-      // Limpiamos la selección del turno y desbloqueamos
       this.cartasSeleccionadas = [];
-      this.bloquearTablero = false;
 
-      // Verificamos si ganó el juego (adivinó las 6 parejas)
       if (this.aciertos === 6) {
-        // Podríamos poner un cartel de victoria aquí
+        this.mensajeResultado = 'GANASTE';
+      } else {
+        this.bloquearTablero = true; // Se bloquea hasta que presione "INTENTAR" de nuevo
       }
+
+      this.cdr.detectChanges(); // Forzamos el redibujado de la victoria o el bloqueo
     } else {
-      // ¡Fallo! Esperamos 1 segundo para que el usuario las memorice, y las volvemos a tapar
+      // NO COINCIDEN: Esperamos exactamente 1 segundo (1000ms) de forma asíncrona
       setTimeout(() => {
+        // Volvemos a poner las cartas boca abajo
         carta1.estaVolteada = false;
         carta2.estaVolteada = false;
         
-        // Limpiamos la selección y desbloqueamos el tablero para el siguiente turno
+        // Limpiamos la lista de selección para habilitar el siguiente turno
         this.cartasSeleccionadas = [];
-        this.bloquearTablero = false;
-      }, 1000); // 1000 milisegundos = 1 segundo
+
+        if (this.intentosRealizados >= this.intentosMaximos && this.aciertos < 6) {
+          this.mensajeResultado = 'PERDISTE';
+        } else {
+          this.bloquearTablero = true; // El tablero se congela hasta presionar "INTENTAR"
+        }
+
+        // ¡MÁGICO! Le ordenamos a Angular que actualice el HTML en este preciso instante
+        this.cdr.detectChanges(); 
+
+      }, 1000); // 1000 milisegundos = 1 segundo exacto
     }
   }
 }
