@@ -31,7 +31,4 @@
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }
-  {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-  }
 }
