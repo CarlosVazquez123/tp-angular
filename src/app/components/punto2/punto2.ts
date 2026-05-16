@@ -52,7 +52,7 @@ export class Punto2 {
 
   // 4. Función para calcular el total acumulado usando expresiones
   calcularTotal(): number {
-    let total = 0;
+    let total = 0; // crea una variable temporal que aranca en cero
     for (let item of this.carrito) {
       total += item.precio;
     }
